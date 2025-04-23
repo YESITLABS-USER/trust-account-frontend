@@ -3,6 +3,9 @@ import { useAuth } from '../../../contexts/AuthContext'
 import Sidebar from '../../../components/header/SideBar'
 import CustomDateRangePicker from '../../../components/DateRangePicker'
 import { useDateRangeFilter } from '../../../hooks/useDateRangeFilter'
+import PaginationControls from '../../../components/user/PaginationControls'
+import useSortableData from '../../../hooks/useSortableData'
+import ReportDownloadDropdown from '../../../components/user/ReportDownloadDropdown'
 
 
 const transactions = Array.from({ length: 100 }, (_, i) => ({
@@ -42,86 +45,42 @@ const IndividualClientLedger = () => {
     const handleSelectClient = (client) => {
         setSelectedClient(client);
     };
-    const filteredData = clients.filter((item) =>
+    const filteredClientData = clients.filter((item) =>
         item.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const handleGetLedgerDaitles = () => {
         selectedClient ? setIsTableOpen(true) : alert("Select the client");
     }
-
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [data, setData] = useState(transactions);
-    const [filteredDataTable, setFilteredDataTable] = useState(data);
+    const [filteredData, setFilteredData] = useState(data);
 
 
     const { handleApply, handleCancel } = useDateRangeFilter({
         data,
         dateKey: 'date',
-        onFilter: setFilteredDataTable,
+        onFilter: setFilteredData,
     });
 
-
-    // 🔹 Sort logic
-    const sortedData = useMemo(() => {
-        const sorted = [...filteredDataTable].sort((a, b) => {
-            let aValue = a[sortConfig.key];
-            let bValue = b[sortConfig.key];
-
-            if (sortConfig.key === "date") {
-                aValue = parseDate(aValue);
-                bValue = parseDate(bValue);
-            } else if (!isNaN(aValue) && !isNaN(bValue)) {
-                aValue = parseFloat(aValue);
-                bValue = parseFloat(bValue);
-            } else {
-                aValue = String(aValue).toLowerCase();
-                bValue = String(bValue).toLowerCase();
-            }
-
-            if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-            if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-            return 0;
-        });
-
-        return sorted;
-    }, [filteredData, sortConfig]);
-
-
-    // 🔹 Helpers
-    const handleSort = (key, type = "string") => {
-        let direction = "asc";
-        if (sortConfig.key === key && sortConfig.direction === "asc") {
-            direction = "desc";
-        }
-        setSortConfig({ key, direction });
-    };
+    // 🔹 Apply Sort
+    const { sortedData, sortConfig, handleSort } = useSortableData(filteredData);
+    const paginatedData = useMemo(() => {
+        const start = (currentPage - 1) * rowsPerPage;
+        return sortedData.slice(start, start + rowsPerPage);
+    }, [sortedData, currentPage, rowsPerPage]);
 
     const getSortArrow = (key) =>
         sortConfig.key === key ? (sortConfig.direction === "asc" ? " ↑" : " ↓") : "";
 
-
-
-
-
-
-
-    // Generate Rows Per Page Options (Multiples of 10 up to total count)
-    const maxRows = Math.ceil(sortedData.length / 10) * 10;
-    const pageSizeOptions = Array.from({ length: maxRows / 10 }, (_, i) => (i + 1) * 10);
-
-    const totalPages = Math.ceil(sortedData.length / rowsPerPage);
-    const paginatedTransactions = sortedData.slice(
-        (currentPage - 1) * rowsPerPage,
-        currentPage * rowsPerPage
-    );
+    const totalRecords = transactions.length;
+    const perPageOptions = [...Array(Math.ceil(totalRecords / 10))].map((_, i) => (i + 1) * 10);
 
 
     return (
         <>
-            <Sidebar />
+
             <div className={`dashboard-body-wrp ${isSidebarOpen ? "show active" : ""}`}>
                 {
                     isTableOpen ? (
@@ -153,7 +112,8 @@ const IndividualClientLedger = () => {
                                             <CustomDateRangePicker onApply={handleApply} onCancel={handleCancel} />
                                         </div>
                                         <div className="dsfilter-rt-btns">
-                                            <a href="./images/download-icon.svg" download="./images/download-icon.svg" className="cmn-btn"><img src="./images/download-icon.svg" alt="" />Download Report</a>
+                                            {/* <a href="./images/download-icon.svg" download="./images/download-icon.svg" className="cmn-btn"><img src="./images/download-icon.svg" alt="" />Download Report</a> */}
+                                            <ReportDownloadDropdown name={'Download Report'} data={data} />
                                         </div>
                                     </div>
                                 </div>
@@ -175,16 +135,21 @@ const IndividualClientLedger = () => {
                                                         { key: "notes", label: "Notes" },
                                                         { key: "reconciled", label: "Reconciled?" },
                                                     ].map(({ key, label }) => (
-                                                        <th key={key} onClick={() => handleSort(key)}>
-                                                            {label} {sortConfig.key === key ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                                                        <th
+                                                            key={key}
+                                                            onClick={label !== "Reconciled?" ? () => handleSort(key) : undefined}
+                                                            style={label !== "Reconciled?" ? { cursor: "pointer" } : {}}
+                                                        >
+                                                            {label} {label !== "Reconciled?" && getSortArrow(key)}
                                                         </th>
                                                     ))}
+
                                                 </tr>
                                             </thead>
                                             <tbody>
 
-                                                {paginatedTransactions.length > 0 ? (
-                                                    paginatedTransactions.map((transaction) => (
+                                                {paginatedData?.length > 0 ? (
+                                                    paginatedData?.map((transaction) => (
                                                         <tr key={transaction?.id}>
                                                             <td>{transaction?.id}</td>
                                                             <td>{transaction?.date}</td>
@@ -225,7 +190,7 @@ const IndividualClientLedger = () => {
                                         </table>
                                     </div>
                                     {/* Par Page Controls */}
-                                    <div className="select-item-count">
+                                    {/* <div className="select-item-count">
                                         <select
                                             value={rowsPerPage}
                                             onChange={(e) => {
@@ -237,9 +202,9 @@ const IndividualClientLedger = () => {
                                                 <option key={size} value={size}>{size} Rows</option>
                                             ))}
                                         </select>
-                                    </div>
+                                    </div> */}
                                     {/* Pagination Controls */}
-                                    <div className="dsbrd-pagination">
+                                    {/* <div className="dsbrd-pagination">
                                         <ul>
                                             <li className="prev" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}>
                                                 <img src="images/left-chevron.svg" alt="Icon" />
@@ -255,7 +220,35 @@ const IndividualClientLedger = () => {
                                                 <img src="images/left-chevron.svg" alt="Icon" />
                                             </li>
                                         </ul>
+                                    </div> */}
+
+                                    {/* Items Per Page Dropdown */}
+                                    <div className="select-item-count">
+                                        <select
+                                            value={rowsPerPage}
+                                            onChange={(e) => {
+                                                setRowsPerPage(Number(e.target.value));
+                                                setCurrentPage(1);
+                                                // Reset to first page when changing items per page
+                                            }}
+                                        >
+                                            {perPageOptions.map((option) => (
+                                                <option key={option} value={option}>
+                                                    {option} per page
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
+
+                                    {/* Pagination Controls */}
+                                    <PaginationControls
+                                        data={sortedData}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        rowsPerPage={rowsPerPage}
+                                    />
+
+
                                 </div>
                             </form>
 
@@ -267,10 +260,10 @@ const IndividualClientLedger = () => {
                                 <strong>Search and Access Detailed Accounting Records for Your Clients</strong>
                             </div>
                             <div class="dsbdy-content max">
-                                <h2 class="dsbdy-content-title">Select Client</h2>
+                                <h2 class="dsbdy-content-title" >Select Client</h2>
                                 <div class="search-ledger-wrp" >
-                                    <div class="search-ledger-head" onClick={() => setSearchClientOpen((prev) => !prev)}>
-                                        <input type="text" readonly placeholder={`${selectedClient ? selectedClient : 'Select Client'}`} id="search-client" />
+                                    <div class="search-ledger-head" onClick={() => setSearchClientOpen((prev) => !prev)} style={{ cursor: "pointer" }}>
+                                        <input type="text" readonly placeholder={`${selectedClient ? selectedClient : 'Select Client'}`} id="search-client" style={{ cursor: "pointer" }} />
                                     </div>
 
                                     <div className={`search-ledger-body ${searchClientOpen ? "slide-in" : "slide-out"}`}
@@ -285,8 +278,8 @@ const IndividualClientLedger = () => {
                                             </div>
                                             <div class="client-list" role="listbox">
                                                 <ul>
-                                                    {filteredData.length > 0 ? (
-                                                        filteredData.map((client, index) => (
+                                                    {filteredClientData.length > 0 ? (
+                                                        filteredClientData.map((client, index) => (
                                                             <li
                                                                 key={index}
                                                                 role="option"

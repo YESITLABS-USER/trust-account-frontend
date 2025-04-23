@@ -3,6 +3,8 @@ import Sidebar from "../../../components/header/SideBar";
 import { useAuth } from "../../../contexts/AuthContext";
 import CustomDateRangePicker from "../../../components/DateRangePicker";
 import { useDateRangeFilter } from "../../../hooks/useDateRangeFilter";
+import useSortableData from "../../../hooks/useSortableData";
+import PaginationControls from "../../../components/user/PaginationControls";
 
 
 // Sample helper to parse DD/MM/YYYY into Date object
@@ -16,7 +18,6 @@ const ClientTrustEntry = () => {
     const [isOpenTabel, setIsOpenTab] = useState(true);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [selectedMonthYear, setSelectedMonthYear] = useState("");
 
     const tableData = [
@@ -99,106 +100,24 @@ const ClientTrustEntry = () => {
         setCurrentPage(1);
     }, [data, selectedMonthYear]);
 
+    // 🔹 Apply Sort
+    const { sortedData, sortConfig, handleSort } = useSortableData(filteredData);
 
-    // 🔹 Sort
-    // 🔹 Sort logic
-    const sortedData = useMemo(() => {
-        const sorted = [...filteredData].sort((a, b) => {
-            let aValue = a[sortConfig.key];
-            let bValue = b[sortConfig.key];
-
-            if (sortConfig.key === "date") {
-                aValue = parseDate(aValue);
-                bValue = parseDate(bValue);
-            } else if (!isNaN(aValue) && !isNaN(bValue)) {
-                aValue = parseFloat(aValue);
-                bValue = parseFloat(bValue);
-            } else {
-                aValue = String(aValue).toLowerCase();
-                bValue = String(bValue).toLowerCase();
-            }
-
-            if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-            if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-            return 0;
-        });
-
-        return sorted;
-    }, [filteredData, sortConfig]);
-
-
-
-    // 🔹 Pagination
-    const totalPages = Math.ceil(sortedData.length / rowsPerPage);
-    const currentRows = sortedData.slice(
-        (currentPage - 1) * rowsPerPage,
-        currentPage * rowsPerPage
-    );
-
-    // 🔹 Sort Handlers
-    const handleSort = (key) => {
-        let direction = "asc";
-        if (sortConfig.key === key && sortConfig.direction === "asc") {
-            direction = "desc";
-        }
-        setSortConfig({ key, direction });
-    };
+    const paginatedData = useMemo(() => {
+        const start = (currentPage - 1) * rowsPerPage;
+        return sortedData.slice(start, start + rowsPerPage);
+    }, [sortedData, currentPage, rowsPerPage]);
 
     const getSortArrow = (key) =>
         sortConfig.key === key ? (sortConfig.direction === "asc" ? " ↑" : " ↓") : "";
 
-    const pageSizeOptions = Array.from({ length: 5 }, (_, i) => (i + 1) * 10);
-
-
-
-
-
-    // Filtering the table based on Month & Year
-    // const filteredData = selectedMonthYear
-    //     ? tableData.filter((row) => {
-    //         const [day, month, year] = row.date.split("/");
-    //         const rowMonthYear = `${new Date(year, month - 1).toLocaleString("en-US", { month: "short" })}-${year}`;
-    //         return rowMonthYear === selectedMonthYear;
-    //     })
-    //     : tableData;
-
-    // Sorting function
-    // const sortedData = [...filteredData].sort((a, b) => {
-    //     if (!sortConfig.key) return 0;
-    //     let valA = a[sortConfig.key];
-    //     let valB = b[sortConfig.key];
-
-    //     if (sortConfig.key === "date") {
-    //         valA = new Date(valA.split("/").reverse().join("-"));
-    //         valB = new Date(valB.split("/").reverse().join("-"));
-    //     } else if (!isNaN(valA) && !isNaN(valB)) {
-    //         valA = Number(valA);
-    //         valB = Number(valB);
-    //     }
-
-    //     if (valA < valB) return sortConfig.direction === "asc" ? -1 : 1;
-    //     if (valA > valB) return sortConfig.direction === "asc" ? 1 : -1;
-    //     return 0;
-    // });
-
-    // Pagination Logic
-    // const totalPages = Math.ceil(filteredDataTable.length / itemsPerPage);
-    // const paginatedData = filteredDataTable.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-    // // Sorting Handler
-    // const handleSort = (key) => {
-    //     setSortConfig((prev) => ({
-    //         key,
-    //         direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
-    //     }));
-    // };
     const totalRecords = tableData.length;
     const perPageOptions = [...Array(Math.ceil(totalRecords / 10))].map((_, i) => (i + 1) * 10);
 
 
     return (
         <>
-            <Sidebar />
+
             <div className={`dashboard-body-wrp show ${isSidebarOpen ? "active" : ""}`}>
                 {
                     isOpenTabel !== true ? (
@@ -242,23 +161,23 @@ const ClientTrustEntry = () => {
                                                 <table>
                                                     <thead>
                                                         <tr>
-                                                            <th className="small-col" onClick={() => handleSort("id")}>S.No ⬍</th>
-                                                            <th className="date-col" onClick={() => handleSort("date")}>Date ⬍</th>
-                                                            <th className="bank-info-col" onClick={() => handleSort("bankInfo")}>Bank Info ⬍</th>
-                                                            <th className="bank-name-col" onClick={() => handleSort("bankName")}>Bank Name ⬍</th>
+                                                            <th className="small-col" onClick={() => handleSort("id")} style={{ cursor: "pointer" }}>S.No {getSortArrow("id")}</th>
+                                                            <th className="date-col" onClick={() => handleSort("date")} style={{ cursor: "pointer" }}>Date {getSortArrow("date")}</th>
+                                                            <th className="bank-info-col" onClick={() => handleSort("bankInfo")} style={{ cursor: "pointer" }}>Bank Info {getSortArrow("bankInfo")}</th>
+                                                            <th className="bank-name-col" onClick={() => handleSort("bankName")} style={{ cursor: "pointer" }}>Bank Name {getSortArrow("bankName")}</th>
                                                             <th className="upload-doc-col">Upload Documents</th>
                                                             <th className="download-doc-col">Download</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {currentRows.length > 0 ? (
-                                                            currentRows.map((row, index) => (
-                                                                <tr key={row.id}>
+                                                        {paginatedData?.length > 0 ? (
+                                                            paginatedData?.map((row, index) => (
+                                                                <tr key={row?.id}>
                                                                     <td>{(currentPage - 1) * rowsPerPage + index + 1}</td>
-                                                                    <td>{row.date}</td>
-                                                                    <td className="text-truncate">{row.bankInfo}</td>
-                                                                    <td className="text-truncate">{row.bankName}</td>
-                                                                    <td className="text-truncate">{row.uploadDoc}</td>
+                                                                    <td>{row?.date}</td>
+                                                                    <td className="text-truncate">{row?.bankInfo}</td>
+                                                                    <td className="text-truncate">{row?.bankName}</td>
+                                                                    <td className="text-truncate">{row?.uploadDoc}</td>
                                                                     <td>
                                                                         <a href="./images/download-icon.svg" download>📥</a>
                                                                     </td>
@@ -274,14 +193,13 @@ const ClientTrustEntry = () => {
                                             </div>
                                         </div>
                                     </div>
-
-
                                     {/* Items Per Page Dropdown */}
                                     <div className="select-item-count">
                                         <select
                                             value={rowsPerPage}
                                             onChange={(e) => {
                                                 setRowsPerPage(Number(e.target.value));
+                                                setCurrentPage(1);
                                                 // Reset to first page when changing items per page
                                             }}
                                         >
@@ -294,23 +212,12 @@ const ClientTrustEntry = () => {
                                     </div>
 
                                     {/* Pagination Controls */}
-                                    <div className="dsbrd-pagination">
-                                        <ul>
-                                            <li className="prev" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}>
-                                                <img src="images/left-chevron.svg" alt="Icon" />
-                                            </li>
-                                            {[...Array(totalPages).keys()].map((num) => (
-                                                <li key={num + 1} className={currentPage === num + 1 ? "active" : ""} style={{
-                                                    color: 'black'
-                                                }} onClick={() => setCurrentPage(num + 1)}>
-                                                    {num + 1}
-                                                </li>
-                                            ))}
-                                            <li className="next" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}>
-                                                <img src="images/left-chevron.svg" alt="Icon" />
-                                            </li>
-                                        </ul>
-                                    </div>
+                                    <PaginationControls
+                                        data={sortedData}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        rowsPerPage={rowsPerPage}
+                                    />
 
                                 </form>
                             </div>

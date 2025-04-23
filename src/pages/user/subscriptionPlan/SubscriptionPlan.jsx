@@ -7,7 +7,7 @@ const SubscriptionPlan = () => {
 
     const handleBuySubscription = () => {
         // handle buy subscription logic here
-        console.log('Buy Subscription Button Clicked')
+        // console.log('Buy Subscription Button Clicked')
         alert(
             'You have successfully purchased a subscription plan. Please check your email for further instructions.',
         )
@@ -17,7 +17,7 @@ const SubscriptionPlan = () => {
 
     return (
         <>
-            <Sidebar />
+           
             <div className={`dashboard-body-wrp subscription-plan ${isSidebarOpen ? "active" : ""}`}>
                 <div className="plans-inr">
                     <div className="sec-head">

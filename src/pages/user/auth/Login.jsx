@@ -23,7 +23,7 @@ const Login = () => {
 
   const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email address").required("Email is required"),
-    phone: Yup.string().required('Phone number is required').matches(/^\d+$/, 'Phone number must only contain numbers'),
+    // phone: Yup.string().required('Phone number is required').matches(/^\d+$/, 'Phone number must only contain numbers'),
     password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
   });
 
@@ -87,7 +87,6 @@ const Login = () => {
                 </div>
               </div>
             </div>
-
             <div className="sign-up-right col-lg-7">
               <div className="sign-right-inr-wrp">
                 <div className="signup-top-head">
@@ -103,7 +102,7 @@ const Login = () => {
                     <Formik
                       initialValues={{
                         email: "",
-                        phone: "",
+                        // phone: "",
                         password: "",
                       }}
                       validationSchema={validationSchema}
@@ -124,7 +123,7 @@ const Login = () => {
                               className="error"
                             />
                           </div>
-                          <div className="input-grp">
+                          {/* <div className="input-grp">
                             <label>Phone</label>
                             <Field
                               type="tel"
@@ -136,7 +135,7 @@ const Login = () => {
                               component="div"
                               className="error"
                             />
-                          </div>
+                          </div> */}
                           <div className="input-grp">
                             <label>Password</label>
                             <Field

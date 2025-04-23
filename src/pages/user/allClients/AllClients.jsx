@@ -3,11 +3,9 @@ import Sidebar from '../../../components/header/SideBar'
 import { useAuth } from '../../../contexts/AuthContext'
 import AddMatterModal from '../../../components/popup/AddMatterModal';
 import AddClientModal from '../../../components/popup/AddClientModal';
-
-const parseDate = (dateStr) => {
-    const parts = dateStr.split("/");
-    return new Date(`${parts[1]}/${parts[0]}/${parts[2]}`);
-};
+import useSortableData from '../../../hooks/useSortableData';
+import PaginationControls from '../../../components/user/PaginationControls';
+import ReportDownloadDropdown from '../../../components/user/ReportDownloadDropdown';
 
 const AllClients = () => {
     const { isSidebarOpen } = useAuth()
@@ -27,7 +25,6 @@ const AllClients = () => {
     const uniqueClients = [...new Set(dummyData.map(item => item.clientName))];
 
     const [searchTerm, setSearchTerm] = useState("");
-    const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
     const [perPage, setPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedCase, setSelectedCase] = useState("");
@@ -40,13 +37,6 @@ const AllClients = () => {
         setCurrentPage(1);
     };
 
-    const handleSort = (key) => {
-        let direction = "asc";
-        if (sortConfig.key === key && sortConfig.direction === "asc") {
-            direction = "desc";
-        }
-        setSortConfig({ key, direction });
-    };
 
     // 🔹 Apply Search, Case, Month filters
     useEffect(() => {
@@ -67,52 +57,26 @@ const AllClients = () => {
     }, [data, searchTerm, selectedCase, selectedClient]);
 
 
+    // 🔹 Apply Sort
+    const { sortedData, sortConfig, handleSort } = useSortableData(filteredData);
 
-    // 🔹 Sort logic
-    const sortedData = useMemo(() => {
-        const sorted = [...filteredData].sort((a, b) => {
-            let aValue = a[sortConfig.key];
-            let bValue = b[sortConfig.key];
-
-            if (sortConfig.key === "date") {
-                aValue = parseDate(aValue);
-                bValue = parseDate(bValue);
-            } else if (!isNaN(aValue) && !isNaN(bValue)) {
-                aValue = parseFloat(aValue);
-                bValue = parseFloat(bValue);
-            } else {
-                aValue = String(aValue).toLowerCase();
-                bValue = String(bValue).toLowerCase();
-            }
-
-            if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-            if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-            return 0;
-        });
-
-        return sorted;
-    }, [filteredData, sortConfig]);
-
-
-
-
-
-    const totalRecords = sortedData.length;
-    const totalPages = Math.ceil(totalRecords / perPage);
     const paginatedData = useMemo(() => {
-        const startIndex = (currentPage - 1) * perPage;
-        return sortedData.slice(startIndex, startIndex + perPage);
+        const start = (currentPage - 1) * perPage;
+        return sortedData.slice(start, start + perPage);
     }, [sortedData, currentPage, perPage]);
 
-    const perPageOptions = [...Array(Math.ceil(totalRecords / 10))].map((_, i) => (i + 1) * 10);
+    const getSortArrow = (key) =>
+        sortConfig.key === key ? (sortConfig.direction === "asc" ? " ↑" : " ↓") : "";
 
+    const totalRecords = dummyData.length;
+    const perPageOptions = [...Array(Math.ceil(totalRecords / 10))].map((_, i) => (i + 1) * 10);
     const handleModalOpen = () => {
         setIsAddMatterModalOpen(true)
     }
 
+    // <CsvDownloader datas={} />;
     return (
         <>
-            <Sidebar />
 
             <div className={`dashboard-body-wrp ${isSidebarOpen ? 'active' : ''}`}>
                 <div className="search-bar-wrp">
@@ -149,8 +113,10 @@ const AllClients = () => {
                                         <p>Total Clients : 100</p>
                                     </div>
                                     <div className="dsfilter-inr-btn-wrp dbllrg-btn">
-                                        <a href="./images/download-icon.svg" download className="cmn-btn"><img src="./images/download-icon.svg" alt="" />Download Report</a>
-                                        <a href="./images/download-icon.svg" download className="cmn-btn"><img src="./images/download-icon.svg" alt="" />Master Download</a>
+                                        <ReportDownloadDropdown name={'Download Report'} data={paginatedData} />
+                                        {/* <a href="./images/download-icon.svg" download className="cmn-btn"><img src="./images/download-icon.svg" alt="" />Download Report</a> */}
+                                        {/* <a href="./images/download-icon.svg" download className="cmn-btn"><img src="./images/download-icon.svg" alt="" />Master Download</a> */}
+                                        <ReportDownloadDropdown name={'Master Download'} data={dummyData} />
                                     </div>
                                 </div>
 
@@ -178,35 +144,39 @@ const AllClients = () => {
                                 </div>
                             </div>
                         </div>
-
                         <div className="ds-bdy-content">
                             <div className="ds-bdy-table-wrp">
                                 <table>
                                     <thead>
-                                        <tr>
-                                            <th>S.No</th>
-                                            <th onClick={() => handleSort("date")}>Date</th>
-                                            <th onClick={() => handleSort("clientName")}>Client Name</th>
-                                            <th onClick={() => handleSort("feeType")}>Fee Type</th>
+                                        <tr >
+                                            <th >S.No</th>
+                                            <th onClick={() => handleSort("date")} style={{ cursor: "pointer" }}>Date {getSortArrow('date')}</th>
+                                            <th onClick={() => handleSort("clientName")} style={{ cursor: "pointer" }}>Client Name  {getSortArrow('clientName')}</th>
+                                            <th onClick={() => handleSort("feeType")} style={{ cursor: "pointer" }}>Fee Type {getSortArrow('feeType')}</th>
                                             <th>Case Summary</th>
-                                            <th onClick={() => handleSort("ledgerBalance")}>Ledger Balance</th>
+                                            <th onClick={() => handleSort("ledgerBalance")} style={{ cursor: "pointer" }}>Ledger Balance {getSortArrow('ledgerBalance')}</th>
                                             <th>Ledger</th>
                                             <th>Flag</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {paginatedData.map((item, index) => (
-                                            <tr key={item.id}>
-                                                <td>{(currentPage - 1) * perPage + index + 1}</td>
-                                                <td>{item.date}</td>
-                                                <td>{item.clientName}</td>
-                                                <td>{item.feeType}</td>
-                                                <td>{item.caseSummary}</td>
-                                                <td>${item.ledgerBalance}</td>
-                                                <td><a href="#" >View</a></td>
-                                                <td><img src={`images/flag-${item.flag}.png`} alt="Flag" className="w-5 h-5 mx-auto" /></td>
+                                        {paginatedData.length > 0 ? (
+                                            paginatedData.map((item, index) => (
+                                                <tr key={item.id}>
+                                                    <td>{(currentPage - 1) * perPage + index + 1}</td>
+                                                    <td>{item?.date}</td>
+                                                    <td>{item?.clientName}</td>
+                                                    <td>{item?.feeType}</td>
+                                                    <td>{item?.caseSummary}</td>
+                                                    <td>${item?.ledgerBalance}</td>
+                                                    <td><a href="#" >View</a></td>
+                                                    <td><img src={`images/flag-${item.flag}.png`} alt="Flag" className="w-5 h-5 mx-auto" /></td>
+                                                </tr>
+                                            ))) : (
+                                            <tr>
+                                                <td colSpan="8">No Data Found</td>
                                             </tr>
-                                        ))}
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -227,28 +197,12 @@ const AllClients = () => {
                                 ))}
                             </select>
                         </div>
-
-                        <div className="dsbrd-pagination">
-                            <ul>
-                                <li className="prev" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}>
-                                    <img src="images/left-chevron.svg" alt="Prev" />
-                                </li>
-                                {[...Array(totalPages).keys()].map((num) => (
-                                    <li
-                                        key={num + 1}
-                                        className={currentPage === num + 1 ? "active" : ""} style={{
-                                            color: 'black'
-                                        }}
-                                        onClick={() => setCurrentPage(num + 1)}
-                                    >
-                                        {num + 1}
-                                    </li>
-                                ))}
-                                <li className="next" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}>
-                                    <img src="images/left-chevron.svg" alt="Next" />
-                                </li>
-                            </ul>
-                        </div>
+                        <PaginationControls
+                            data={sortedData}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            rowsPerPage={perPage}
+                        />
                     </form>
                 </div>
             </div>

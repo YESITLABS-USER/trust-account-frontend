@@ -38,7 +38,7 @@ const MyProfile = () => {
 
     return (
         <>
-            <Sidebar />
+           
             <div className={`dashboard-body-wrp show ${isSidebarOpen ? " active" : ""}`}>
                 <div className="dashboard-body">
                     <div className="ds-bdy-head max">

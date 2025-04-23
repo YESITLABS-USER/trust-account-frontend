@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Button, Form, InputGroup, CloseButton } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { forgotPassword, resetPassword, verifyOtp } from "../../../redux/slices/User/userSlice";
-
+import * as Yup from "yup";
 const ForgotPassword = ({ show, handleClose }) => {
   const dispatch = useDispatch();
 
@@ -17,14 +17,19 @@ const ForgotPassword = ({ show, handleClose }) => {
   const [otp, setOtp] = useState("");
   const togglePasswordVisibility = () => setPasswordVisible(!passwordVisible);
   const toggleConfirmPasswordVisibility = () => setConfirmPasswordVisible(!confirmPasswordVisible);
+ const validationSchema = Yup.object({
+    email: Yup.string().email("Invalid email address").required("Email is required"),
+    password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+  });
+
+
 
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await dispatch(forgotPassword({ email: email }))
-      console.log(res)
-      if (res) {
-        console.log(res)
+      console.log()
+      if (!res.error) {
         setStep(2); // Proceed to OTP step
       }
     }
@@ -39,7 +44,7 @@ const ForgotPassword = ({ show, handleClose }) => {
     console.log(email)
     try {
       const res = await dispatch(verifyOtp({ email: email, otp: otp }))
-      if (res) {
+      if (!res.error) {
         setStep(3); // Proceed to Reset Password step
       }
     } catch (error) {
@@ -71,7 +76,7 @@ const ForgotPassword = ({ show, handleClose }) => {
       if (res.payload) {  // Ensure request was successful
         alert("Password has been reset successfully!");
         setStep(4); // Proceed to Success step
-        handleClose(); // Close the modal
+        // handleClose(); // Close the modal
       } else {
         console.log(res)
         alert("Failed to reset password. Please try again.");
@@ -108,21 +113,37 @@ const ForgotPassword = ({ show, handleClose }) => {
       document.querySelectorAll(".otp-input")[index - 1].focus();
     }
   };
-
-
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setPassword((prevState) => ({
       ...prevState,
       [name]: value, // Dynamically update password or confirmPassword
     }));
-  };
+  }; 
 
 
+  const inputStyle = {
+    borderRadius: '10px',
+    padding: '12px 14px',
+    fontSize: '14px',
+    border: '1.5px solid #000',
+    width: '100%',
+    color: 'black',
+    backgroundColor: 'white',
+    outline: 'none',
+    boxShadow: 'none',
 
-
-
+};
+const labelStyle = {
+    position: 'absolute',
+    top: '60px',
+    left: '28px',
+    background: 'white',
+    padding: '0 5px',
+    fontSize: '16px',
+    color: '#000429',
+    zIndex: 1
+}
 
   return (
     <>
@@ -145,14 +166,11 @@ const ForgotPassword = ({ show, handleClose }) => {
           }}
         >
           <div className="close-btn"
-            onClick={handleClose} // replace with your close handler
+            onClick={() => { setStep(1); handleClose() }} // replace with your close handler
           >
             ×
           </div>
         </div>
-
-
-
         <Modal.Header className="border-0 pb-0">
           <Modal.Title className="w-100 text-center fw-bold fs-2 text-dark mb-4">
             {step === 1
@@ -171,12 +189,14 @@ const ForgotPassword = ({ show, handleClose }) => {
               </p>
               <Form onSubmit={handleForgotSubmit}>
                 <Form.Group>
-                  <Form.Label className="float-start">Email/Phone</Form.Label>
+                  <Form.Label style={labelStyle} >Email/Phone</Form.Label>
                   <Form.Control
-                    type="text"
+                    type="email"
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your Email/Phone"
                     required
+                    style={inputStyle}
+                    validationSchema={validationSchema}
                   />
                 </Form.Group>
                 <Button type="submit" className="mt-4 w-40">

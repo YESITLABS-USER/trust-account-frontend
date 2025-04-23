@@ -4,11 +4,11 @@ import { toast } from "react-toastify";
 
 // For Unauthenticated User
 function logouterror() {
-    toast.error("Token Expired")
-    localStorage.removeItem("trust-account");
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 1000);
+  toast.error("Token Expired")
+  localStorage.removeItem("trust-account");
+  setTimeout(() => {
+    window.location.href = "/";
+  }, 1000);
 }
 
 export const userInfo = createAsyncThunk("user/userInfo", async (_, { rejectWithValue }) => {
@@ -96,7 +96,7 @@ const userSlice = createSlice({
   name: "user",
   initialState: {
     user: [],
-    isUser : null,
+    isUser: null,
     loading: false,
     error: null,
     message: null,
@@ -104,7 +104,6 @@ const userSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      
       // User Info
       .addCase(userInfo.pending, (state) => {
         state.loading = true;
@@ -112,19 +111,19 @@ const userSlice = createSlice({
       })
       .addCase(userInfo.fulfilled, (state, action) => {
         state.loading = false;
-        state.message = action.payload.message || "User Fetch successfully";   
-        state.isUser = action.payload.user;    
+        state.message = action.payload.message || "User Fetch successfully";
+        state.isUser = action.payload.user;
       })
       .addCase(userInfo.rejected, (state, action) => {
         state.loading = false;
+        state.isUser = JSON.parse(localStorage.getItem("trust-account"))
         state.error = action.payload?.errors;
-        toast.error(action.payload.message || "Session Expired");
+        (state.isUser) && toast.error(action.payload.message || "Session Expired");
         localStorage.removeItem("trust-account");
         setTimeout(() => {
           window.location.href = "/login"
-        },1000);     
+        }, 1000);
       })
-
       // Create user
       .addCase(signup.pending, (state) => {
         state.loading = true;
@@ -132,12 +131,12 @@ const userSlice = createSlice({
       })
       .addCase(signup.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;  
-        state.message = "User created successfully"; 
+        state.user = action.payload;
+        state.message = "User created successfully";
         toast.success(action.payload.message || "User Register successfully")
         setTimeout(() => {
           window.location.href = "/login"
-        },1000);       
+        }, 1000);
       })
       .addCase(signup.rejected, (state, action) => {
         state.loading = false;
@@ -152,18 +151,20 @@ const userSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;  
-        localStorage.setItem("trust-account", JSON.stringify(action.payload));
-        toast.success(action.payload.message || "User Login successfully")
+        state.user = action.payload;
+        console.log(action.payload)
+        action.payload.role == 'user' || action.payload.role == 'aternie' ?
+          (localStorage.setItem("trust-account", JSON.stringify(action.payload)), toast.success(action.payload.message || "User Login successfully")) :
+          toast.error("User Not authrized to access this resource")
         setTimeout(() => {
           window.location.href = "/bank-statement"
-        },1000); 
+        }, 1000);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.errors || "Error in Login";
         toast.error(action.payload.message || "Invalid Credential")
-        if(action.payload.message == "Unauthenticated.") {
+        if (action.payload.message == "Unauthenticated.") {
           logouterror();
         }
       })
@@ -210,7 +211,7 @@ const userSlice = createSlice({
         state.error = action.payload?.errors || "Error in Password reset";
         toast.error(action.payload.message || "Error in Password reset");
       })
-      
+
       // Edit user
       .addCase(updateUser.pending, (state) => {
         state.loading = true;
@@ -218,13 +219,13 @@ const userSlice = createSlice({
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;  
-        state.message = "User updated successfully"; 
+        state.user = action.payload;
+        state.message = "User updated successfully";
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to update user";
-        if(action.payload.message == "Unauthenticated.") {
+        if (action.payload.message == "Unauthenticated.") {
           logouterror();
         }
       })
@@ -236,15 +237,15 @@ const userSlice = createSlice({
       })
       .addCase(deleteUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;  
-        state.message = "User Deleted successfully"; 
+        state.user = action.payload;
+        state.message = "User Deleted successfully";
         toast.success(action.payload.message || "User deleted successfully")
       })
       .addCase(deleteUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to delete user";
         toast.error(action.payload.message || "Failed to delete user")
-        if(action.payload.message == "Unauthenticated.") {
+        if (action.payload.message == "Unauthenticated.") {
           logouterror();
         }
       });

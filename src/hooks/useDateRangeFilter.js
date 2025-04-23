@@ -1,6 +1,5 @@
 // hooks/useDateRangeFilter.js
 import { useCallback } from "react";
-import { format } from "date-fns";
 import { filterByDateRange } from "../utils/dateRangeFilter";
 
 export const useDateRangeFilter = ({ data, dateKey, onFilter }) => {

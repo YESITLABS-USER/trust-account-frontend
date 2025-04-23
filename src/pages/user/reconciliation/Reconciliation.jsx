@@ -22,14 +22,25 @@ const Reconciliation = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (
+      !formData.accountCloseDate ||
+      !formData.accountOpenDate ||
+      !formData.accountNumber ||
+      !formData.accountName ||
+      !formData.bankName ||
+      !formData.firmName
+    ) {
+      alert("Please fill all the fields");
+      return;
+    }
     setIsReconciliationOpen((prev) => !prev);
-    console.log("Form Submitted", formData);
+    // console.log("Form Submitted", formData);
   };
 
   return (
     <>
-      <Sidebar />
-      <div className={`dashboard-body-wrp  ${ isSidebarOpen ? " show active" : ""} reconciliation-pg`}>
+
+      <div className={`dashboard-body-wrp  ${isSidebarOpen ? " show active" : ""} reconciliation-pg`}>
         {isReconciliationOpen !== true ? (
           <div className="dashboard-body">
             <div className="ds-bdy-head max">
@@ -50,7 +61,7 @@ const Reconciliation = () => {
                       type="text"
                       name="firmName"
                       placeholder="Firm Name"
-                      value={formData.firmName}
+                      value={formData?.firmName}
                       onChange={handleChange}
                     />
                   </div>
@@ -60,7 +71,7 @@ const Reconciliation = () => {
                       type="text"
                       name="bankName"
                       placeholder="Bank Name"
-                      value={formData.bankName}
+                      value={formData?.bankName}
                       onChange={handleChange}
                     />
                   </div>
@@ -70,7 +81,7 @@ const Reconciliation = () => {
                       type="text"
                       name="accountName"
                       placeholder="Enter Account Name"
-                      value={formData.accountName}
+                      value={formData?.accountName}
                       onChange={handleChange}
                     />
                   </div>
@@ -80,18 +91,18 @@ const Reconciliation = () => {
                       type="text"
                       name="accountNumber"
                       placeholder="Enter Account Number"
-                      value={formData.accountNumber}
+                      value={formData?.accountNumber}
                       onChange={handleChange}
                     />
                   </div>
 
                   <div className="multifiled-wrp">
-                    <div className="input-grp">
+                    {/* <div className="input-grp">
                       <label htmlFor="month">Month</label>
                       <select
                         name="month"
                         id="month"
-                        value={formData.month}
+                        value={formData?.month}
                         onChange={handleChange}
                       >
                         <option value="">Select Month</option>
@@ -114,14 +125,14 @@ const Reconciliation = () => {
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </div> */}
 
-                    <div className="input-grp">
+                    {/* <div className="input-grp">
                       <label htmlFor="year">Year</label>
                       <select
                         name="year"
                         id="year"
-                        value={formData.year}
+                        value={formData?.year}
                         onChange={handleChange}
                       >
                         <option value="">Select Year</option>
@@ -134,14 +145,14 @@ const Reconciliation = () => {
                           );
                         })}
                       </select>
-                    </div>
+                    </div> */}
 
                     <div className="input-grp">
                       <label>Account Open Date</label>
                       <input
                         type="date"
                         name="accountOpenDate"
-                        value={formData.accountOpenDate}
+                        value={formData?.accountOpenDate}
                         onChange={handleChange}
                       />
                     </div>
@@ -150,7 +161,7 @@ const Reconciliation = () => {
                       <input
                         type="date"
                         name="accountCloseDate"
-                        value={formData.accountCloseDate}
+                        value={formData?.accountCloseDate}
                         onChange={handleChange}
                       />
                     </div>
@@ -166,38 +177,38 @@ const Reconciliation = () => {
             </div>
           </div>
         ) : (
-          <div class="dashboard-body dsbrd-tbl-body">
+          <div className="dashboard-body dsbrd-tbl-body">
             <form>
-              <div class="back-btn-firm-records">
+              <div className="back-btn-firm-records">
                 <a href="#" onClick={handleSubmit}>
                   <img src="images/back-icon.svg" alt="Back icon" />
                 </a>
-                <div class="bank-charges-inr-btn-wrp">
+                <div className="bank-charges-inr-btn-wrp">
                   <a
                     href="./images/download-icon.svg"
                     download="./images/download-icon.svg"
-                    class="cmn-btn"
+                    className="cmn-btn"
                   >
                     <img src="./images/download-icon.svg" alt="" />
                     Download in pdf
                   </a>
                 </div>
               </div>
-              <div class="firm-records-heading">
+              <div className="firm-records-heading">
                 <h1>FIRM RECORDS - ACCOUNT BALANCES</h1>
               </div>
 
               {/* <!-- QUESTION SECTION WRAP --> */}
-              <div class="question-ans-main-wrap">
+              <div className="question-ans-main-wrap">
                 {/* <!-- QUIZ SEC --> */}
-                <div class="quiz-sec">
-                  <div class="question-head-wrap">
+                <div className="quiz-sec">
+                  <div className="question-head-wrap">
                     <h4>
-                      <span class="counterquiz">1.</span> TRUST ACCOUNT JOURNAL
+                      <span className="counterquiz">1.</span> TRUST ACCOUNT JOURNAL
                       BALANCE
                     </h4>
                   </div>
-                  <div class="answer-para-wrap">
+                  <div className="answer-para-wrap">
                     <p>
                       Does each entry contain the information required by
                       Standard (1)(b), adopted pursuant to rule
@@ -205,15 +216,15 @@ const Reconciliation = () => {
                       current balance)
                     </p>
                   </div>
-                  <div class="yes-and-no-wrap">
+                  <div className="yes-and-no-wrap">
                     <button type="button">No</button>
                     <button type="button">Yes</button>
                   </div>
                 </div>
                 {/* <!-- QUIZ SEC -->
                             <!-- AMOUNT SEC --> */}
-                <div class="amount-sec">
-                  <div class="amount-sec-wrap">
+                <div className="amount-sec">
+                  <div className="amount-sec-wrap">
                     <span>$18,700</span>
                   </div>
                 </div>
@@ -222,21 +233,21 @@ const Reconciliation = () => {
               {/* <!-- QUESTION SECTION WRAP -->
 
                         <!-- QUESTION SECTION WRAP --> */}
-              <div class="question-ans-main-wrap">
+              <div className="question-ans-main-wrap">
                 {/* <!-- QUIZ SEC --> */}
-                <div class="quiz-sec">
-                  <div class="question-head-wrap">
-                    <h4 class="pb-2">
-                      <span class="counterquiz">2.</span> TOTAL OF ALL
+                <div className="quiz-sec">
+                  <div className="question-head-wrap">
+                    <h4 className="pb-2">
+                      <span className="counterquiz">2.</span> TOTAL OF ALL
                       INDIVIDUAL LEDGER BALANCES
                     </h4>
                     <h5>
-                      <span class="counterquiz">A.</span> Total Individual
+                      <span className="counterquiz">A.</span> Total Individual
                       Client Ledger Balances, including all undisbursed funds
                       pursuant to rule 1.15(c)(2)
                     </h5>
                   </div>
-                  <div class="answer-para-wrap">
+                  <div className="answer-para-wrap">
                     <p>
                       Do all of the client ledgers have a positive or zero
                       balance?
@@ -245,11 +256,11 @@ const Reconciliation = () => {
                       action taken.
                     </p>
                   </div>
-                  <div class="yes-and-no-wrap">
+                  <div className="yes-and-no-wrap">
                     <button type="button">No</button>
                     <button type="button">Yes</button>
                   </div>
-                  <div class="answer-para-wrap">
+                  <div className="answer-para-wrap">
                     <p>
                       Does each entry contain the information required by
                       Standard (1)(b), adopted pursuant to rule
@@ -259,28 +270,28 @@ const Reconciliation = () => {
                       corrective action taken.
                     </p>
                   </div>
-                  <div class="yes-and-no-wrap">
+                  <div className="yes-and-no-wrap">
                     <button type="button">No</button>
                     <button type="button">Yes</button>
                   </div>
                 </div>
                 {/* <!-- QUIZ SEC -->
                             <!-- AMOUNT SEC --> */}
-                <div class="amount-sec">
-                  <div class="amount-sec-wrap">
+                <div className="amount-sec">
+                  <div className="amount-sec-wrap">
                     <span>$26,500</span>
                   </div>
                 </div>
                 {/* <!-- AMOUNT SEC -->
                             <!-- QUIZ SEC --> */}
-                <div class="quiz-sec mt-3">
-                  <div class="question-head-wrap">
+                <div className="quiz-sec mt-3">
+                  <div className="question-head-wrap">
                     <h5>
-                      <span class="counterquiz">B.</span> Total Bank Charges
+                      <span className="counterquiz">B.</span> Total Bank Charges
                       Balance in Trust Account
                     </h5>
                   </div>
-                  <div class="answer-para-wrap">
+                  <div className="answer-para-wrap">
                     <p>
                       In compliance with rule 1.15(c)(1), are the firm funds in
                       the account no more than reasonably
@@ -289,15 +300,15 @@ const Reconciliation = () => {
                       corrective action taken.
                     </p>
                   </div>
-                  <div class="yes-and-no-wrap">
+                  <div className="yes-and-no-wrap">
                     <button type="button">No</button>
                     <button type="button">Yes</button>
                   </div>
                 </div>
                 {/* <!-- QUIZ SEC -->
                             <!-- AMOUNT SEC --> */}
-                <div class="amount-sec">
-                  <div class="amount-sec-wrap">
+                <div className="amount-sec">
+                  <div className="amount-sec-wrap">
                     <span>$175.00</span>
                   </div>
                 </div>
@@ -306,11 +317,11 @@ const Reconciliation = () => {
               {/* <!-- QUESTION SECTION WRAP -->
 
                         <!-- QUESTION SECTION WRAP --> */}
-              <div class="question-ans-main-wrap">
+              <div className="question-ans-main-wrap">
                 {/* <!-- QUIZ SEC --> */}
-                <div class="quiz-sec">
-                  <div class="question-head-wrap">
-                    <h4 class="pb-2">
+                <div className="quiz-sec">
+                  <div className="question-head-wrap">
+                    <h4 className="pb-2">
                       TOTAL 2. INDIVIDUAL LEDGERS (A+B) (automatically
                       calculated)
                     </h4>
@@ -318,8 +329,8 @@ const Reconciliation = () => {
                 </div>
                 {/* <!-- QUIZ SEC -->
                             <!-- AMOUNT SEC --> */}
-                <div class="amount-sec">
-                  <div class="amount-sec-wrap">
+                <div className="amount-sec">
+                  <div className="amount-sec-wrap">
                     <span>$26,675.00</span>
                   </div>
                 </div>
@@ -327,17 +338,17 @@ const Reconciliation = () => {
               </div>
               {/* <!-- QUESTION SECTION WRAP --> */}
 
-              <div class="firm-records-heading">
+              <div className="firm-records-heading">
                 <h1>BANK RECORDS - ACCOUNT BALANCES</h1>
               </div>
 
               {/* <!-- QUESTION SECTION WRAP --> */}
-              <div class="question-ans-main-wrap">
+              <div className="question-ans-main-wrap">
                 {/* <!-- QUIZ SEC --> */}
-                <div class="quiz-sec">
-                  <div class="question-head-wrap">
+                <div className="quiz-sec">
+                  <div className="question-head-wrap">
                     <h4>
-                      <span class="counterquiz">3.</span> ADJUSTED BANK
+                      <span className="counterquiz">3.</span> ADJUSTED BANK
                       STATEMENT BALANCE
                     </h4>
                   </div>
@@ -347,20 +358,20 @@ const Reconciliation = () => {
               {/* <!-- QUESTION SECTION WRAP -->
 
                         <!-- QUESTION SECTION WRAP --> */}
-              <div class="question-ans-main-wrap">
+              <div className="question-ans-main-wrap">
                 {/* <!-- QUIZ SEC --> */}
-                <div class="quiz-sec">
-                  <div class="question-head-wrap">
+                <div className="quiz-sec">
+                  <div className="question-head-wrap">
                     <h5>
-                      <span class="counterquiz">A.</span> Bank Statement Ending
+                      <span className="counterquiz">A.</span> Bank Statement Ending
                       Balance
                     </h5>
                   </div>
                 </div>
                 {/* <!-- QUIZ SEC -->
                             <!-- AMOUNT SEC --> */}
-                <div class="amount-sec">
-                  <div class="amount-sec-wrap">
+                <div className="amount-sec">
+                  <div className="amount-sec-wrap">
                     <span>$32,675.00</span>
                   </div>
                 </div>
@@ -369,12 +380,12 @@ const Reconciliation = () => {
               {/* <!-- QUESTION SECTION WRAP -->
 
                         <!-- QUESTION SECTION WRAP --> */}
-              <div class="question-ans-main-wrap">
+              <div className="question-ans-main-wrap">
                 {/* <!-- QUIZ SEC --> */}
-                <div class="quiz-sec">
-                  <div class="question-head-wrap">
+                <div className="quiz-sec">
+                  <div className="question-head-wrap">
                     <h5>
-                      <span class="counterquiz">B.</span> Add Outstanding
+                      <span className="counterquiz">B.</span> Add Outstanding
                       Deposits (total deposits made to the account through the
                       end of bank statement period, but not reflected on bank
                       statement)
@@ -383,8 +394,8 @@ const Reconciliation = () => {
                 </div>
                 {/* <!-- QUIZ SEC -->
                             <!-- AMOUNT SEC --> */}
-                <div class="amount-sec">
-                  <div class="amount-sec-wrap">
+                <div className="amount-sec">
+                  <div className="amount-sec-wrap">
                     <span>$-</span>
                   </div>
                 </div>
@@ -393,12 +404,12 @@ const Reconciliation = () => {
               {/* <!-- QUESTION SECTION WRAP -->
 
                         <!-- QUESTION SECTION WRAP --> */}
-              <div class="question-ans-main-wrap">
+              <div className="question-ans-main-wrap">
                 {/* <!-- QUIZ SEC --> */}
-                <div class="quiz-sec">
-                  <div class="question-head-wrap">
+                <div className="quiz-sec">
+                  <div className="question-head-wrap">
                     <h5>
-                      <span class="counterquiz">C.</span> Less Outstanding
+                      <span className="counterquiz">C.</span> Less Outstanding
                       Disbursements (checks and other disbursements made through
                       the end of the bank statement period, but not reflected in
                       bank statement)
@@ -407,8 +418,8 @@ const Reconciliation = () => {
                 </div>
                 {/* <!-- QUIZ SEC -->
                             <!-- AMOUNT SEC --> */}
-                <div class="amount-sec">
-                  <div class="amount-sec-wrap">
+                <div className="amount-sec">
+                  <div className="amount-sec-wrap">
                     <span>-$6000</span>
                   </div>
                 </div>
@@ -417,22 +428,22 @@ const Reconciliation = () => {
               {/* <!-- QUESTION SECTION WRAP -->
 
                         <!-- QUESTION SECTION WRAP --> */}
-              <div class="question-ans-main-wrap">
+              <div className="question-ans-main-wrap">
                 {/* <!-- QUIZ SEC --> */}
-                <div class="quiz-sec">
-                  <div class="question-head-wrap">
+                <div className="quiz-sec">
+                  <div className="question-head-wrap">
                     <h4>
                       TOTAL 3. (A+B-C) ADJUSTED BANK STATEMENT BALANCE
                       (automatically calculated)
                     </h4>
                   </div>
-                  <div class="answer-para-wrap">
+                  <div className="answer-para-wrap">
                     <p>
                       If no, your account is not reconciled. Identify the
                       error(s) and re-reconcile the account.
                     </p>
                   </div>
-                  <div class="yes-and-no-wrap">
+                  <div className="yes-and-no-wrap">
                     <button type="button">No</button>
                     <button type="button">Yes</button>
                   </div>
@@ -440,8 +451,8 @@ const Reconciliation = () => {
 
                 {/* <!-- QUIZ SEC -->
                             <!-- AMOUNT SEC --> */}
-                <div class="amount-sec">
-                  <div class="amount-sec-wrap">
+                <div className="amount-sec">
+                  <div className="amount-sec-wrap">
                     <span>$26,675.00</span>
                   </div>
                 </div>
@@ -449,30 +460,30 @@ const Reconciliation = () => {
               </div>
               {/* <!-- QUESTION SECTION WRAP --> */}
 
-              <div class="firm-records-heading">
+              <div className="firm-records-heading">
                 <h1>BANK RECORDS - ACCOUNT BALANCES</h1>
-                <div class="preparer-inr">
-                  <div class="preparer-docs">
-                    <div class="input-grp">
+                <div className="preparer-inr">
+                  <div className="preparer-docs">
+                    <div className="input-grp">
                       <input type="text" placeholder="Sally Mae" />
                       <label>Preparer Name</label>
                     </div>
-                    <div class="input-grp">
+                    <div className="input-grp">
                       <input type="text" placeholder="Preparer" />
                       <label>Position</label>
                     </div>
-                    <div class="input-grp">
-                      <div class="input-grp-inr">
-                        <span class="upload">Upload </span>
+                    <div className="input-grp">
+                      <div className="input-grp-inr">
+                        <span className="upload">Upload </span>
                         <input type="file" placeholder="Upload" />
                       </div>
                       <label>Signature</label>
                     </div>
-                    <div class="input-grp">
-                      <div class="input-grp-inr">
+                    <div className="input-grp">
+                      <div className="input-grp-inr">
                         <input
                           type="text"
-                          class="date"
+                          className="date"
                           placeholder="05-02-2025"
                         />
                       </div>
@@ -481,9 +492,9 @@ const Reconciliation = () => {
                   </div>
                 </div>
               </div>
-              <div class="firm-records-heading mt-5">
+              <div className="firm-records-heading mt-5">
                 <h2>ATTORNEY CERTIFICATION</h2>
-                <p class="firmhdng-txt">
+                <p className="firmhdng-txt">
                   I certify that I personally reviewed the above trust account
                   reconciliation report and all supporting documents listed
                   above, and understand this reconciliation is not deemed
@@ -492,28 +503,28 @@ const Reconciliation = () => {
                   responsibility to ensure all funds are properly held,
                   regardless of who prepared the reconciliation.
                 </p>
-                <div class="preparer-inr">
-                  <div class="preparer-docs">
-                    <div class="input-grp">
+                <div className="preparer-inr">
+                  <div className="preparer-docs">
+                    <div className="input-grp">
                       <input type="text" placeholder="Sally Mae" />
                       <label>Attorney Name</label>
                     </div>
-                    <div class="input-grp">
+                    <div className="input-grp">
                       <input type="text" placeholder="1313" />
                       <label>Bar Number</label>
                     </div>
-                    <div class="input-grp">
-                      <div class="input-grp-inr">
-                        <span class="upload">Upload </span>
+                    <div className="input-grp">
+                      <div className="input-grp-inr">
+                        <span className="upload">Upload </span>
                         <input type="file" placeholder="Upload" />
                       </div>
                       <label>Signature</label>
                     </div>
-                    <div class="input-grp">
-                      <div class="input-grp-inr">
+                    <div className="input-grp">
+                      <div className="input-grp-inr">
                         <input
                           type="text"
-                          class="date"
+                          className="date"
                           placeholder="05-02-2025"
                         />
                       </div>

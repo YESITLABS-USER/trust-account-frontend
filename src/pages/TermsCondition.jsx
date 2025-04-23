@@ -3,15 +3,15 @@ import React from "react";
 const TermsCondition = () => {
   return (
     <div>
-      <header class="main-head">
-        <div class="container">
-          <div class="nav-inr">
-            <nav class="navbar navbar-expand-lg">
-              <a class="navbar-brand" href="/">
+      <header className="main-head">
+        <div className="container">
+          <div className="nav-inr">
+            <nav className="navbar navbar-expand-lg">
+              <a className="navbar-brand" href="/">
                 <img src="images/logo.png" alt="Logo" />
               </a>
               <button
-                class="navbar-toggler navbar-toggler-main"
+                className="navbar-toggler navbar-toggler-main"
                 type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent"
@@ -19,11 +19,11 @@ const TermsCondition = () => {
                 aria-expanded="false"
                 aria-label="Toggle navigation"
               >
-                <span class="stick"></span>
+                <span className="stick"></span>
               </button>
-              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <button
-                  class="navbar-toggler navbar-toggler-main"
+                  className="navbar-toggler navbar-toggler-main"
                   type="button"
                   data-bs-toggle="collapse"
                   data-bs-target="#navbarSupportedContent"
@@ -31,9 +31,9 @@ const TermsCondition = () => {
                   aria-expanded="false"
                   aria-label="Toggle navigation"
                 >
-                  <span class="stick"></span>
+                  <span className="stick"></span>
                 </button>
-                <ul class="navbar-nav ms-auto">
+                <ul className="navbar-nav ms-auto">
                   <li>
                     <a href="/">Home</a>
                   </li>
@@ -51,14 +51,14 @@ const TermsCondition = () => {
                   </li>
                 </ul>
               </div>
-              <a href="sign-in.html" class="hdr-btn">
+              <a href="sign-in.html" className="hdr-btn">
                 <span>Customer Login</span>
               </a>
             </nav>
           </div>
         </div>
         <button
-          class="navbar-toggler"
+          className="navbar-toggler"
           id="navoverlay"
           type="button"
           data-bs-toggle="collapse"
@@ -69,13 +69,13 @@ const TermsCondition = () => {
         ></button>
       </header>
 
-      <div class="terms-conditions-sec inner-page cmn-gap">
-        <div class="container">
-          <div class="terms-conditions-inr position-relative">
-            <div class="blob"></div>
-            <h1 class="h2-title">Terms & Conditions</h1>
+      <div className="terms-conditions-sec inner-page cmn-gap">
+        <div className="container">
+          <div className="terms-conditions-inr position-relative">
+            <div className="blob"></div>
+            <h1 className="h2-title">Terms & Conditions</h1>
 
-            <div class="terms-conditions-content inner-page-hero-content">
+            <div className="terms-conditions-content inner-page-hero-content">
               <p>
                 Lorem ipsum dolor sit amet consectetur. Ut pharetra amet
                 ullamcorper nisl tempor. Lorem turpis ut arcu aliquet. Viverra
@@ -142,14 +142,14 @@ const TermsCondition = () => {
       </div>
 
       <footer>
-        <div class="container">
-          <div class="footer-inr">
-            <a href="/" class="footer-logo">
+        <div className="container">
+          <div className="footer-inr">
+            <a href="/" className="footer-logo">
               <img src="images/logo.png" alt="logo" />
             </a>
-            <div class="footer-links">
+            <div className="footer-links">
               <ul>
-                <li class="current-menu-item">
+                <li className="current-menu-item">
                   <a href="/terms-conditions">Terms & Conditions</a>
                 </li>
                 <li>
@@ -157,7 +157,7 @@ const TermsCondition = () => {
                 </li>
               </ul>
             </div>
-            <div class="footer-content">
+            <div className="footer-content">
               <p>All rights reserved</p>
             </div>
           </div>

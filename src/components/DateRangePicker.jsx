@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DateRangePicker } from 'rsuite';
 import { format } from 'date-fns'; // ✅ import format
-import 'rsuite/dist/rsuite.min.css';
+// import 'rsuite/dist/rsuite.min.css';
 
 const CustomDateRangePicker = ({ onApply, onCancel }) => {
   const [value, setValue] = useState(null);

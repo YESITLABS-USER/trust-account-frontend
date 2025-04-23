@@ -43,13 +43,12 @@ const BankStatement = () => {
   ];
 
   const handleSaveAndOpenTable = async () => {
-    console.log("Save and Open Table");
+    // console.log("Save and Open Table");
     setShowTable(true);
   }
 
   return (
     <>
-      <SideBar isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className={`dashboard-body-wrp show ${isSidebarOpen ? " active" : ""}`}>
         {
           showTabel ?
@@ -66,8 +65,27 @@ const BankStatement = () => {
                   </p>
                 </div>
 
+                {/* Client Information Section */}
+                <div className="ds-client-info-wrp">
+                  <h3>Client Information</h3>
+                  <form>
+                    <div className="ds-client-info-form">
+                      <div className="input-grp">
+                        <label htmlFor="bank-info">Bank Information</label>
+                        <input type="text" id="bank-info" placeholder="Enter Bank Information" />
+                      </div>
+                      <div className="input-grp">
+                        <label htmlFor="bank-name">Bank Name</label>
+                        <input type="text" id="bank-name" placeholder="Enter Bank Name" />
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
+
                 <div className="dsbdy-content">
                   <h2 className="dsbdy-content-title">Upload Document</h2>
+
                   <form>
                     <div className="input-grp">
                       <label>Upload Bank Statement</label>

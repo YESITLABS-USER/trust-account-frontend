@@ -3,6 +3,9 @@ import Sidebar from '../../../components/header/SideBar'
 import { useAuth } from '../../../contexts/AuthContext';
 import CustomDateRangePicker from '../../../components/DateRangePicker';
 import { useDateRangeFilter } from '../../../hooks/useDateRangeFilter';
+import useSortableData from '../../../hooks/useSortableData';
+import PaginationControls from '../../../components/user/PaginationControls';
+import ReportDownloadDropdown from '../../../components/user/ReportDownloadDropdown';
 
 const parseDate = (dateStr) => {
     const parts = dateStr.split("/");
@@ -13,10 +16,8 @@ const parseDate = (dateStr) => {
 const OutstandingDeposits = () => {
 
     const { isSidebarOpen } = useAuth()
-    const [isOpenTabel, setIsOpenTab] = useState(true);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
     const [selectedMonthYear, setSelectedMonthYear] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     // Expanded Sample Data with 50 Entries
@@ -88,15 +89,7 @@ const OutstandingDeposits = () => {
     };
 
 
-    // Filtering Data based on Month & Year and Search Query
-    // const filteredData = tableData.filter(row => {
-    //     const [day, month, year] = row.date.split('/');
-    //     const rowMonthYear = `${new Date(year, month - 1).toLocaleString('en-US', { month: 'short' })}-${year}`;
-    //     return (
-    //         (selectedMonthYear ? rowMonthYear === selectedMonthYear : true) &&
-    //         (searchQuery ? row.payer.toLowerCase().includes(searchQuery.toLowerCase()) : true)
-    //     );
-    // });
+
 
 
 
@@ -131,55 +124,27 @@ const OutstandingDeposits = () => {
 
         setFilteredData(result);
         setCurrentPage(1);
-    }, [data, searchQuery,selectedMonthYear]);
+    }, [data, searchQuery, selectedMonthYear]);
 
 
 
-    // 🔹 Sort logic
-    const sortedData = useMemo(() => {
-        const sorted = [...filteredData].sort((a, b) => {
-            let aValue = a[sortConfig.key];
-            let bValue = b[sortConfig.key];
+    // 🔹 Apply Sort
+    const { sortedData, sortConfig, handleSort } = useSortableData(filteredData);
+    const paginatedData = useMemo(() => {
+        const start = (currentPage - 1) * rowsPerPage;
+        return sortedData.slice(start, start + rowsPerPage);
+    }, [sortedData, currentPage, rowsPerPage]);
 
-            if (sortConfig.key === "date") {
-                aValue = parseDate(aValue);
-                bValue = parseDate(bValue);
-            } else if (!isNaN(aValue) && !isNaN(bValue)) {
-                aValue = parseFloat(aValue);
-                bValue = parseFloat(bValue);
-            } else {
-                aValue = String(aValue).toLowerCase();
-                bValue = String(bValue).toLowerCase();
-            }
+    const getSortArrow = (key) =>
+        sortConfig.key === key ? (sortConfig.direction === "asc" ? " ↑" : " ↓") : "";
 
-            if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-            if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-            return 0;
-        });
-
-        return sorted;
-    }, [filteredData, sortConfig]);
-
-
-    // 🔹 Helpers
-    const handleSort = (key, type = "string") => {
-        let direction = "asc";
-        if (sortConfig.key === key && sortConfig.direction === "asc") {
-            direction = "desc";
-        }
-        setSortConfig({ key, direction });
-    };
-
-    // Pagination Logic
-    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-    const paginatedData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
     const totalRecords = tableData.length;
     const perPageOptions = [...Array(Math.ceil(totalRecords / 10))].map((_, i) => (i + 1) * 10);
 
 
     return (
         <>
-            <Sidebar />
+
             <div className={`dashboard-body-wrp show ${isSidebarOpen ? "active" : ""}`}>
                 <div className="search-bar-wrp">
                     <div className="search-bar">
@@ -214,16 +179,17 @@ const OutstandingDeposits = () => {
                                     <div className="input-grp">
                                         <select value={selectedMonthYear} onChange={(e) => { setSelectedMonthYear(e.target.value); setCurrentPage(1); }}>
                                             <option value="">All Months</option>
-                                            {monthYearOptions.map((option) => (
+                                            {monthYearOptions?.map((option) => (
                                                 <option key={option} value={option}>{option}</option>
                                             ))}
                                         </select>
                                     </div>
                                 </div>
                                 <div className="bank-charges-inr-btn-wrp">
-                                    <a href="./images/download-icon.svg" download className="cmn-btn">
+                                    {/* <a href="./images/download-icon.svg" download className="cmn-btn">
                                         <img src="./images/download-icon.svg" alt="Download" /> Download Report
-                                    </a>
+                                    </a> */}
+                                    <ReportDownloadDropdown name={'Download Report'} data={data} />
                                 </div>
                             </div>
                         </div>
@@ -235,24 +201,24 @@ const OutstandingDeposits = () => {
                                     <table>
                                         <thead>
                                             <tr>
-                                                <th className="small-col" onClick={() => handleSort("id")}>S.No ⬍</th>
-                                                <th className="date-col" onClick={() => handleSort("date")}>Date ⬍</th>
-                                                <th className="check-number-col" onClick={() => handleSort("checkNumber")}>Check Number ⬍</th>
-                                                <th className="payer-col" onClick={() => handleSort("payer")}>Payer ⬍</th>
-                                                <th className="related-to-client-col" onClick={() => handleSort("client")}>Related to Client ⬍</th>
-                                                <th className="amount-col" onClick={() => handleSort("amount")}>Amount ⬍</th>
+                                                <th className="small-col" onClick={() => handleSort("id")} style={{ cursor: "pointer" }}>S.No {getSortArrow("id")}</th>
+                                                <th className="date-col" onClick={() => handleSort("date")} style={{ cursor: "pointer" }}>Date  {getSortArrow("date")}</th>
+                                                <th className="check-number-col" onClick={() => handleSort("checkNumber")} style={{ cursor: "pointer" }}>Check Number {getSortArrow("check")}</th>
+                                                <th className="payer-col" onClick={() => handleSort("payer")} style={{ cursor: "pointer" }}>Payer {getSortArrow("payer")}</th>
+                                                <th className="related-to-client-col" onClick={() => handleSort("client")} style={{ cursor: "pointer" }}>Related to Client {getSortArrow("client")}</th>
+                                                <th className="amount-col" onClick={() => handleSort("amount")} style={{ cursor: "pointer" }}>Amount {getSortArrow("amount")}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {paginatedData.length > 0 ? (
-                                                paginatedData.map((row, index) => (
+                                            {paginatedData?.length > 0 ? (
+                                                paginatedData?.map((row, index) => (
                                                     <tr key={row.id}>
-                                                        <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                                                        <td>{row.date}</td>
-                                                        <td className="text-truncate">{row.checkNumber}</td>
-                                                        <td className="text-truncate">{row.payer}</td>
-                                                        <td className="text-truncate">{row.client}</td>
-                                                        <td className="text-truncate">${row.amount.toFixed(2)}</td>
+                                                        <td>{(currentPage - 1) * rowsPerPage + index + 1}</td>
+                                                        <td>{row?.date}</td>
+                                                        <td className="text-truncate">{row?.checkNumber} </td>
+                                                        <td className="text-truncate">{row?.payer}</td>
+                                                        <td className="text-truncate">{row?.client}</td>
+                                                        <td className="text-truncate">${row?.amount.toFixed(2)}</td>
                                                     </tr>
                                                 ))
                                             ) : (
@@ -266,9 +232,9 @@ const OutstandingDeposits = () => {
                             </div>
                         </div>
                         {/* Items Per Page Dropdown */}
-                        <div className="select-item-count">
+                        {/* <div className="select-item-count">
                             <select
-                                value={itemsPerPage}
+                                value={rowsPerPage}
                                 onChange={(e) => {
                                     setItemsPerPage(Number(e.target.value));
                                     // Reset to first page when changing items per page
@@ -280,10 +246,10 @@ const OutstandingDeposits = () => {
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </div> */}
 
                         {/* Pagination Controls */}
-                        <div className="dsbrd-pagination">
+                        {/* <div className="dsbrd-pagination">
                             <ul>
                                 <li className="prev" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}>
                                     <img src="images/left-chevron.svg" alt="Icon" />
@@ -299,7 +265,34 @@ const OutstandingDeposits = () => {
                                     <img src="images/left-chevron.svg" alt="Icon" />
                                 </li>
                             </ul>
+                        </div> */}
+
+                        {/* Items Per Page Dropdown */}
+                        <div className="select-item-count">
+                            <select
+                                value={rowsPerPage}
+                                onChange={(e) => {
+                                    setRowsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
+                                    // Reset to first page when changing items per page
+                                }}
+                            >
+                                {perPageOptions?.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option} per page
+                                    </option>
+                                ))}
+                            </select>
                         </div>
+
+                        {/* Pagination Controls */}
+                        <PaginationControls
+                            data={sortedData}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            rowsPerPage={rowsPerPage}
+                        />
+
 
                     </form>
                 </div>

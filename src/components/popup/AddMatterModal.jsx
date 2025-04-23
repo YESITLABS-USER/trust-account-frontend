@@ -16,11 +16,25 @@ const AddMatterModal = ({ isOpen, onClose }) => {
         description: "",
         caseDate: ""
     });
-
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData((prev) => {
+            const updatedForm = { ...prev, [name]: value };
+
+            // Validation: Close Date should not be before Open Date
+            if (name === "closeDate" && updatedForm.openDate && value < updatedForm.openDate) {
+                alert("Close Date cannot be earlier than Open Date");
+                return prev; // prevent update
+            }
+            if (name === "openDate" && updatedForm.closeDate && updatedForm.closeDate < value) {
+                alert("Open Date cannot be after Close Date");
+                return prev; // prevent update
+            }
+
+            return updatedForm;
+        });
     };
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -59,7 +73,7 @@ const AddMatterModal = ({ isOpen, onClose }) => {
         background: 'white',
         padding: '0 5px',
         fontSize: '16px',
-        color: '#333',
+        color: '#000429',
         zIndex: 1
     }
 
@@ -76,7 +90,12 @@ const AddMatterModal = ({ isOpen, onClose }) => {
     };
 
     return (
-        <Modal show={isOpen} onHide={onClose} centered style={{ borderRadius:'15px' }}>
+        <Modal show={isOpen} onHide={onClose} centered style={{
+            borderRadius: '15px', 
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backdropFilter: 'blur(5px)',
+            zIndex: '1000000000'
+        }}>
             <div
                 style={{
                     display: "flex",
@@ -93,7 +112,7 @@ const AddMatterModal = ({ isOpen, onClose }) => {
             </div>
             <Modal.Body style={{ padding: '30px', borderRadius: '20px' }}>
                 <div className="text-center mb-4">
-                    <h5 style={{ fontWeight: 'bold', color: '#2d2f54' }}>Add Matter</h5>
+                    <h5 style={{ fontWeight: 'bold', color: '#000429' }}>Add Matter</h5>
                     <p style={{ fontSize: '13px', color: '#6c757d' }}>
                         Lorem Ipsum has been the industry's standard dummy
                     </p>
@@ -116,7 +135,7 @@ const AddMatterModal = ({ isOpen, onClose }) => {
                                 e.target.style.boxShadow = 'none';
                             }}
                         >
-                            <option value="">Client</option>
+                            <option value="" disabled selected style={{color:'#000429'}}> Client</option>
                             <option value="Client A">Client A</option>
                             <option value="Client B">Client B</option>
                         </Form.Select>

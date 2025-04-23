@@ -1,24 +1,26 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import Sidebar from '../../../components/header/SideBar';
+// // import Sidebar from '../../../components/header/SideBar';
 import { useAuth } from '../../../contexts/AuthContext';
 import CustomDateRangePicker from '../../../components/DateRangePicker';
 import { useDateRangeFilter } from '../../../hooks/useDateRangeFilter';
+import PaginationControls from '../../../components/user/PaginationControls';
+import useSortableData from '../../../hooks/useSortableData';
+import ReportDownloadDropdown from '../../../components/user/ReportDownloadDropdown';
+import AddNotesModal from '../../../components/popup/AddNotesModal';
 
 const parseDate = (dateStr) => {
     const parts = dateStr.split("/");
     return new Date(`${parts[1]}/${parts[0]}/${parts[2]}`);
 };
 
-
 const LienManagement = () => {
     const { isSidebarOpen } = useAuth();
     const [searchTerm, setSearchTerm] = useState("");
-    const [dateRange, setDateRange] = useState("");
+    const [showAddNote, setShowAddNote] = useState(false);
+    const [newNotes, setNewNotes] = useState({})
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
-    
-        const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  
+    const [liensId, setLiensId] = useState('')
     const [liens, setLiens] = useState([
         { id: 1, holder: "Rita", amount: 100, date: "01/03/2024", status: true },
         { id: 2, holder: "Sita", amount: 200, date: "02/03/2024", status: false },
@@ -47,12 +49,6 @@ const LienManagement = () => {
 
 
     const handleSearchChange = (e) => setSearchTerm(e.target.value);
-    const handleDateChange = (e) => setDateRange(e.target.value);
-    const handleItemsPerPageChange = (e) => {
-        setItemsPerPage(Number(e.target.value));
-        setCurrentPage(1);
-    };
-
 
     const { handleApply, handleCancel } = useDateRangeFilter({
         data,
@@ -75,52 +71,44 @@ const LienManagement = () => {
     }, [data, searchTerm]);
 
 
-    // 🔹 Sort logic
-    const sortedData = useMemo(() => {
-        const sorted = [...filteredData].sort((a, b) => {
-            let aValue = a[sortConfig.key];
-            let bValue = b[sortConfig.key];
+    // 🔹 Apply Sort
+    const { sortedData, sortConfig, handleSort } = useSortableData(filteredData);
+    const paginatedData = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return sortedData.slice(start, start + itemsPerPage);
+    }, [sortedData, currentPage, itemsPerPage]);
 
-            if (sortConfig.key === "date") {
-                aValue = parseDate(aValue);
-                bValue = parseDate(bValue);
-            } else if (!isNaN(aValue) && !isNaN(bValue)) {
-                aValue = parseFloat(aValue);
-                bValue = parseFloat(bValue);
-            } else {
-                aValue = String(aValue).toLowerCase();
-                bValue = String(bValue).toLowerCase();
-            }
+    const getSortArrow = (key) =>
+        sortConfig.key === key ? (sortConfig.direction === "asc" ? " ↑" : " ↓") : "";
 
-            if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-            if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-            return 0;
-        });
+    const totalRecords = liens.length;
+    const perPageOptions = [...Array(Math.ceil(totalRecords / 10))].map((_, i) => (i + 1) * 10);
 
-        return sorted;
-    }, [filteredData, sortConfig]);
-
-
-    // 🔹 Helpers
-    const handleSort = (key, type = "string") => {
-        let direction = "asc";
-        if (sortConfig.key === key && sortConfig.direction === "asc") {
-            direction = "desc";
+    const handleAddNote = (noteText) => {
+        const trimmedText = noteText.trim();
+        if (!trimmedText) {
+            console.warn("Note text is empty.");
+            return; // prevent adding empty notes
         }
-        setSortConfig({ key, direction });
+
+        const newNote = {
+            id: liensId,
+            text: trimmedText,
+        };
+
+        setNewNotes(newNote);
     };
 
+    const handleAddNoteId = (itemId) => {
+        setLiensId(itemId)
+        setShowAddNote(true)
+    }
 
 
-    // Pagination Logic
-    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-    const paginatedLiens = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-    const totalRecords = sortedData.length;
-    const perPageOptions = [...Array(Math.ceil(totalRecords / 10))].map((_, i) => (i + 1) * 10);
+    // console.log("Note added:", newNotes);
     return (
         <>
-            <Sidebar />
+
             <div className={`dashboard-body-wrp show ${isSidebarOpen ? "active" : ""}`}>
                 <div className="search-bar-wrp">
                     <div className="search-bar">
@@ -147,9 +135,10 @@ const LienManagement = () => {
                                     </div>
                                     <div className="ds-filter-input-wrp ms-2">
                                         <div className="bank-charges-inr-btn-wrp d-flex justify-content-end rtat">
-                                            <a href="./images/download-icon.svg" download className="cmn-btn m-0">
+                                            {/* <a href="./images/download-icon.svg" download className="cmn-btn m-0">
                                                 <img src="./images/download-icon.svg" alt="" />Export as csv
-                                            </a>
+                                            </a> */}
+                                            <ReportDownloadDropdown name={'Export as csv'} data={data} />
                                         </div>
                                     </div>
                                 </div>
@@ -160,27 +149,31 @@ const LienManagement = () => {
                                 <table className="leader-summry-table">
                                     <thead>
                                         <tr>
-                                            <th onClick={() => handleSort("id")}>S.No</th>
-                                            <th onClick={() => handleSort("holder")}>Lien Holder</th>
-                                            <th onClick={() => handleSort("amount")}>Amount</th>
-                                            <th onClick={() => handleSort("date")}>Date Issue</th>
-                                            <th onClick={() => handleSort("status")}>Status</th>
+                                            <th onClick={() => handleSort("id")} style={{ cursor: "pointer" }}>S.No {getSortArrow('id')}</th>
+                                            <th onClick={() => handleSort("holder")} style={{ cursor: "pointer" }}>Lien Holder {getSortArrow('holder')}</th>
+                                            <th onClick={() => handleSort("amount")} style={{ cursor: "pointer" }}>Amount {getSortArrow('amount')}</th>
+                                            <th onClick={() => handleSort("date")} style={{ cursor: "pointer" }}>Date Issue {getSortArrow('date')}</th>
+                                            <th >Status</th>
                                             <th>Resolve Liens</th>
                                             <th>Add Notes</th>
                                         </tr>
                                     </thead>
                                     <tbody>
 
-                                        {paginatedLiens.length > 0 ? (
-                                            paginatedLiens.map((lien, index) => (
-                                                <tr key={lien.id}>
+                                        {paginatedData?.length > 0 ? (
+                                            paginatedData?.map((lien, index) => (
+                                                <tr key={lien?.id}>
                                                     <td>{index + 1 + (currentPage - 1) * itemsPerPage}</td>
-                                                    <td>{lien.holder}</td>
-                                                    <td>{lien.amount}</td>
-                                                    <td>{lien.date}</td>
-                                                    <td>{lien.status ? "Active" : "Deactive"}</td>
+                                                    <td>{lien?.holder}</td>
+                                                    <td>{lien?.amount}</td>
+                                                    <td>{lien?.date}</td>
+                                                    <td>{lien?.status ? "Active" : "Deactive"}</td>
                                                     <td className="resolve-anchor"><a href="#url">Resolve</a></td>
-                                                    <td className="resolve-anchor"><a href="#url" data-popup="add-notes">Add</a></td>
+                                                    <td className="resolve-anchor"
+                                                        // onClick={() => setShowAddNote(true)}
+                                                        onClick={() => handleAddNoteId(lien?.id)}
+                                                    ><a href="#">Add</a></td>
+
                                                 </tr>
                                             ))) : (
                                             <tr>
@@ -192,44 +185,41 @@ const LienManagement = () => {
                                 </table>
                             </div>
                         </div>
+
                         {/* Items Per Page Dropdown */}
                         <div className="select-item-count">
                             <select
                                 value={itemsPerPage}
                                 onChange={(e) => {
                                     setItemsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
                                     // Reset to first page when changing items per page
                                 }}
                             >
-                                {perPageOptions.map((option) => (
+                                {perPageOptions?.map((option) => (
                                     <option key={option} value={option}>
                                         {option} per page
                                     </option>
                                 ))}
                             </select>
                         </div>
+
                         {/* Pagination Controls */}
-                        <div className="dsbrd-pagination">
-                            <ul>
-                                <li className="prev" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}>
-                                    <img src="images/left-chevron.svg" alt="Icon" />
-                                </li>
-                                {[...Array(totalPages).keys()].map((num) => (
-                                    <li key={num + 1} className={currentPage === num + 1 ? "active" : ""} style={{
-                                        color: 'black'
-                                    }} onClick={() => setCurrentPage(num + 1)}>
-                                        {num + 1}
-                                    </li>
-                                ))}
-                                <li className="next" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}>
-                                    <img src="images/left-chevron.svg" alt="Icon" />
-                                </li>
-                            </ul>
-                        </div>
+                        <PaginationControls
+                            data={sortedData}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            rowsPerPage={itemsPerPage}
+                        />
 
                     </form>
                 </div>
             </div>
+            <AddNotesModal
+                show={showAddNote}
+                handleClose={() => setShowAddNote(false)}
+                handleAddNote={handleAddNote}
+            />
         </>
     );
 };

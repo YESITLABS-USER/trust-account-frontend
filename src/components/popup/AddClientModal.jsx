@@ -29,7 +29,7 @@ const AddClientModal = ({ isOpen, onClose }) => {
         background: 'white',
         padding: '0 5px',
         fontSize: '16px',
-        color: '#333',
+        color: '#000429',
         zIndex: 1
     }
 
@@ -68,13 +68,19 @@ const AddClientModal = ({ isOpen, onClose }) => {
     };
 
     return (
-        <Modal show={isOpen} onHide={onClose} centered>
+        <Modal show={isOpen} onHide={onClose} centered style={{
+                borderRadius: '15px',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                backdropFilter: 'blur(5px)',
+                zIndex: '1000000000'
+            }}>
             <div
                 style={{
                     display: "flex",
                     justifyContent: "flex-end",
                     borderRadius: "10px",
                     maxWidth: "100%",
+                    zIndex: '1000000000'
                 }}
             >
                 <div className="close-btn"
